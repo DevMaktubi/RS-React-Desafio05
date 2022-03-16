@@ -1,0 +1,17 @@
+{
+  "id": "test",
+  "type": "SharedSlice",
+  "name": "Test",
+  "description": "Test",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "sktwi1xtmkfgx8626",
+      "description": "Test",
+      "primary": {},
+      "items": {}
+    }
+  ]
+}
