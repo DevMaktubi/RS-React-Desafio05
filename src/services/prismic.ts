@@ -1,7 +1,7 @@
 import * as prismic from '@prismicio/client';
 
 // Fill in your repository name
-export const repositoryName = 'Ignews-devmaktub';
+export const repositoryName = 'maktubblog';
 const endpoint = prismic.getEndpoint(repositoryName);
 
 export const client = prismic.createClient(endpoint, {
@@ -16,7 +16,7 @@ export const client = prismic.createClient(endpoint, {
   // to an empty array or remove the option entirely.
   routes: [
     {
-      type: 'post',
+      type: 'posts',
       path: '/:uid',
     },
   ],

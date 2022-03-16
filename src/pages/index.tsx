@@ -26,19 +26,20 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-export default function Home({}: HomeProps) {
+export default function Home({ postsPagination }: HomeProps) {
   return <h1>HELLO THERE!</h1>;
 }
 
 export const getStaticProps = async () => {
-  const result = await client.getAllByType('post');
+  const result = await client.getAllByType('posts');
+  console.log(result);
   const posts = result.map(post => {
     return {
       slug: post.uid,
-      title: RichText.asText(post.data.title),
-      subtitle: RichText.asText(post.data.subtitle),
-      author: RichText.asText(post.data.author),
-      date: formatDate(post.first_publication_date),
+      title: post.data.title,
+      subtitle: post.data.subtitle,
+      author: post.data.author,
+      date: formatDate(new Date(post.first_publication_date)),
     };
   });
   // TODO
