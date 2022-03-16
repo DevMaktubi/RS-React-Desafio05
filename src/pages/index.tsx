@@ -1,4 +1,6 @@
 import { GetStaticProps } from 'next';
+import { RichText } from 'prismic-dom';
+import { formatDate } from '../services/convertData';
 
 import { client } from '../services/prismic';
 
@@ -29,7 +31,16 @@ export default function Home({}: HomeProps) {
 }
 
 export const getStaticProps = async () => {
-  const posts = await client.getAllByType('post');
+  const result = await client.getAllByType('post');
+  const posts = result.map(post => {
+    return {
+      slug: post.uid,
+      title: RichText.asText(post.data.title),
+      subtitle: RichText.asText(post.data.subtitle),
+      author: RichText.asText(post.data.author),
+      date: formatDate(post.first_publication_date),
+    };
+  });
   // TODO
   return {
     props: {
