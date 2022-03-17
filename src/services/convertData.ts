@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
-import ptBr from 'date-fns/locale/pt-BR';
+import ptBr from 'date-fns/locale/pt';
 
-export const formatDate = (date: Date): string => {
-  return format(date, 'dd/MM/yyyy', { locale: ptBr });
+export const convertData = (date: Date): string => {
+  return format(date, `dd MMM yyyy`, { locale: ptBr });
 };

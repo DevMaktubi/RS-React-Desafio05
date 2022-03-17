@@ -1,1 +1,52 @@
 // TODO
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.posts {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 6rem 3rem;
+
+  button {
+    margin-top: 4rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    background-color: transparent;
+    border: 0;
+    width: 200px;
+    p {
+      color: var(--purple-300);
+    }
+  }
+}
+.post {
+  display: flex;
+  height: 6.75rem;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 700px;
+  & + .post {
+    margin-top: 2rem;
+  }
+  .postTitle {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--primary-text-color);
+    transition: color 0.25s;
+
+    &:hover {
+      color: var(--purple-300);
+      cursor: pointer;
+    }
+  }
+  .postSubtitle {
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--secondary-text-color);
+  }
+}

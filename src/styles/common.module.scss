@@ -1,1 +1,18 @@
 // TODO
+.postInfo {
+  margin-top: 1.5rem;
+  display: flex;
+  color: var(--terciary-text-color);
+  div {
+    display: flex;
+    align-items: center;
+    p {
+      font-size: 0.8rem;
+      font-weight: 400;
+      margin-left: 0.5rem;
+    }
+    & + div {
+      margin-left: 1.6rem;
+    }
+  }
+}
