@@ -1,12 +1,14 @@
+/* eslint-disable no-param-reassign */
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { RichText } from 'prismic-dom';
 import { ReactElement } from 'react';
 import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
+import Prismic from '@prismicio/client';
 import { convertData } from '../../services/convertData';
 
-import { client } from '../../services/prismic';
+import { getPrismicClient } from '../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
@@ -25,7 +27,9 @@ interface Post {
         text: string;
       }[];
     }[];
+    subtitle?: string;
   };
+  uid?: string;
 }
 
 interface PostProps {
@@ -33,8 +37,20 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps): ReactElement {
-  const router = useRouter();
-  return router.isFallback ? (
+  const { isFallback } = useRouter();
+
+  const minutesToRead = post.data.content.reduce((acc, content) => {
+    function countWords(str: string): number {
+      return str.trim().split(/\s+/).length;
+    }
+
+    acc += countWords(content.heading) / 200;
+    acc += countWords(RichText.asText(content.body)) / 200;
+
+    return Math.ceil(acc);
+  }, 0);
+
+  return isFallback ? (
     <div>Carregando...</div>
   ) : (
     <>
@@ -50,17 +66,17 @@ export default function Post({ post }: PostProps): ReactElement {
         <article className={styles.postContent}>
           <h1 className={styles.postTitle}>{post.data.title}</h1>
           <div className={commonStyles.postInfo}>
-            <div className={commonStyles.postData}>
+            <time className={commonStyles.postData}>
               <FiCalendar size={24} />
-              <p>{post.first_publication_date}</p>
-            </div>
+              {convertData(new Date(post.first_publication_date))}
+            </time>
             <div className={styles.postAuthor}>
               <FiUser size={24} />
-              <p>{post.data.author}</p>
+              {post.data.author}
             </div>
             <div className={styles.postReadingTime}>
               <FiClock size={24} />
-              <p>4 min</p>
+              {minutesToRead} min
             </div>
           </div>
           {post.data.content.map((content, index) => (
@@ -85,26 +101,34 @@ export default function Post({ post }: PostProps): ReactElement {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const posts = await client.getAllByType('posts');
-  const paths = posts.map(post => ({
+  const prismic = getPrismicClient();
+  const posts = await prismic.query(
+    [Prismic.predicates.at('document.type', 'posts')],
+    {
+      fetch: ['posts.title', 'posts.banner', 'posts.author', 'posts.content'],
+    }
+  );
+
+  const paths = posts.results.map(result => ({
     params: {
-      slug: post.uid,
+      slug: result.uid,
     },
   }));
+
   return {
     paths,
-    fallback: 'blocking',
+    fallback: true,
   };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { slug } = params;
-  const response = await client.getByUID('posts', String(slug));
+
+  const prismic = getPrismicClient();
+  const response: Post = await prismic.getByUID('posts', String(slug), {});
 
   const post: Post = {
-    first_publication_date: convertData(
-      new Date(response.first_publication_date)
-    ),
+    first_publication_date: response.first_publication_date,
     data: {
       title: response.data.title,
       banner: {
@@ -112,11 +136,14 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       },
       author: response.data.author,
       content: response.data.content,
+      subtitle: response.data.subtitle,
     },
+    uid: response.uid,
   };
   return {
     props: {
       post,
     },
+    revalidate: 60 * 60 * 24, // 1 day
   };
 };

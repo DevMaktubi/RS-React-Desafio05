@@ -3,9 +3,10 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { ReactElement, useEffect, useState } from 'react';
 import { FiCalendar, FiUser } from 'react-icons/fi';
+import Prismic from '@prismicio/client';
 import { convertData } from '../services/convertData';
 
-import { client } from '../services/prismic';
+import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
@@ -83,7 +84,7 @@ export default function Home({ postsPagination }: HomeProps): ReactElement {
                 <div className={commonStyles.postInfo}>
                   <div className={commonStyles.postData}>
                     <FiCalendar size={24} />
-                    <p>{post.first_publication_date}</p>
+                    <p>{convertData(new Date(post.first_publication_date))}</p>
                   </div>
                   <div className={commonStyles.postAuthor}>
                     <FiUser size={24} />
@@ -104,32 +105,38 @@ export default function Home({ postsPagination }: HomeProps): ReactElement {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const result = await client.getByType('posts', {
-    page: 1,
-    pageSize: 1,
-  });
-  const posts: Post[] = result.results.map(post => {
-    return {
+  const prismic = getPrismicClient();
+  const postsResponse: PostPagination = await prismic.query(
+    [Prismic.predicates.at('document.type', 'posts')],
+    {
+      fetch: ['posts.title', 'posts.subtitle', 'posts.author'],
+      pageSize: 1,
+    }
+  );
+
+  const { next_page, results } = postsResponse;
+
+  const posts: Post[] = results.map(
+    (post): Post => ({
       uid: post.uid,
-      first_publication_date: convertData(
-        new Date(post.first_publication_date)
-      ),
+      first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
         author: post.data.author,
       },
-    };
-  });
-  const { next_page } = result;
+    })
+  );
 
-  const postsPagination: PostPagination = {
-    next_page,
-    results: posts,
-  };
+  const timeToRevalidate = 60 * 3;
+
   return {
     props: {
-      postsPagination,
+      postsPagination: {
+        next_page,
+        results: posts,
+      },
     },
+    revalidate: timeToRevalidate,
   };
 };
