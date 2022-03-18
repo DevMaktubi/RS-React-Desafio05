@@ -1,7 +1,9 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { RichText } from 'prismic-dom';
 import { ReactElement } from 'react';
+import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 import { convertData } from '../../services/convertData';
 
 import { client } from '../../services/prismic';
@@ -49,28 +51,31 @@ export default function Post({ post }: PostProps): ReactElement {
           <h1 className={styles.postTitle}>{post.data.title}</h1>
           <div className={commonStyles.postInfo}>
             <div className={commonStyles.postData}>
-              <img src="/images/calendar.svg" alt="Calendar" />
+              <FiCalendar size={24} />
               <p>{post.first_publication_date}</p>
             </div>
             <div className={styles.postAuthor}>
-              <img src="/images/author.svg" alt="Author" />
+              <FiUser size={24} />
               <p>{post.data.author}</p>
             </div>
             <div className={styles.postReadingTime}>
-              <img src="/images/clock.svg" alt="Reading time" />
+              <FiClock size={24} />
               <p>4 min</p>
             </div>
           </div>
-          {post.data.content.map(content => (
-            <div key={content.heading} className={styles.postContentSection}>
+          {post.data.content.map((content, index) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <div key={index} className={styles.postContentSection}>
               <h2 className={styles.postContentSectionTitle}>
                 {content.heading}
               </h2>
-              {content.body.map(body => (
-                <p key={body.text} className={styles.postContentSectionText}>
-                  {body.text}
-                </p>
-              ))}
+              <div
+                className={styles.postContentSectionText}
+                // eslint-disable-next-line react/no-danger
+                dangerouslySetInnerHTML={{
+                  __html: RichText.asHtml(content.body),
+                }}
+              />
             </div>
           ))}
         </article>

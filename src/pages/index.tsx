@@ -2,6 +2,7 @@ import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { ReactElement, useEffect, useState } from 'react';
+import { FiCalendar, FiUser } from 'react-icons/fi';
 import { convertData } from '../services/convertData';
 
 import { client } from '../services/prismic';
@@ -81,11 +82,11 @@ export default function Home({ postsPagination }: HomeProps): ReactElement {
                 <p className={styles.postSubtitle}>{post.data.subtitle}</p>
                 <div className={commonStyles.postInfo}>
                   <div className={commonStyles.postData}>
-                    <img src="/images/calendar.svg" alt="Calendar" />
+                    <FiCalendar size={24} />
                     <p>{post.first_publication_date}</p>
                   </div>
                   <div className={commonStyles.postAuthor}>
-                    <img src="/images/author.svg" alt="Author" />
+                    <FiUser size={24} />
                     <p>{post.data.author}</p>
                   </div>
                 </div>
